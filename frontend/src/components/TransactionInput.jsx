@@ -28,7 +28,7 @@ const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
     <div className="glass-panel">
       <h2 style={{ marginBottom: '15px', fontSize: '1.2rem', fontWeight: 600 }}>Schedule Input</h2>
       
-      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '15px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
         <input 
           type="text" 
           placeholder="Txn (e.g., T1)" 
@@ -58,7 +58,7 @@ const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
         </button>
       </form>
 
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px' }}>
         {operations.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No operations added yet.</span>}
         {operations.map((op, idx) => (
           <div key={op.id} style={{
@@ -86,7 +86,7 @@ const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
         ))}
       </div>
 
-      <div className="flex-between">
+      <div className="flex-between" style={{ gap: '16px', flexWrap: 'wrap', marginTop: '10px' }}>
         <button 
           className="btn btn-outline" 
           onClick={() => dispatch({ type: 'CLEAR_SCHEDULE' })}

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { ReactFlow, useNodesState, useEdgesState, Background, Controls } from '@xyflow/react';
+import { ReactFlow, useNodesState, useEdgesState, Background, Controls, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 const PrecedenceGraph = ({ analysisResult }) => {
@@ -22,6 +22,7 @@ const PrecedenceGraph = ({ analysisResult }) => {
           style: {
              background: analysisResult.cyclePath.includes(nodeId) ? 'rgba(239, 68, 68, 0.2)' : 'var(--panel-bg)',
              borderColor: analysisResult.cyclePath.includes(nodeId) ? 'var(--accent-danger)' : 'var(--accent-primary)',
+             color: 'var(--text-main)'
           }
         };
       });
@@ -37,6 +38,12 @@ const PrecedenceGraph = ({ analysisResult }) => {
           style: {
             stroke: isCycleEdge ? 'var(--accent-danger)' : 'var(--text-muted)',
             strokeWidth: isCycleEdge ? 3 : 2
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
+            color: isCycleEdge ? 'var(--accent-danger)' : 'var(--text-muted)'
           },
           labelStyle: { fill: 'var(--text-main)', fontWeight: 600 },
           labelBgStyle: { fill: 'var(--panel-bg)' }
@@ -54,7 +61,7 @@ const PrecedenceGraph = ({ analysisResult }) => {
   return (
     <div className="glass-panel" style={{ height: '100%', minHeight: '400px', display: 'flex', flexDirection: 'column' }}>
       <h2 style={{ marginBottom: '15px', fontSize: '1.2rem', fontWeight: 600 }}>Precedence Graph</h2>
-      <div style={{ flex: 1, borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)' }}>
+      <div style={{ flex: 1, borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.5)' }}>
         {nodes.length > 0 ? (
           <ReactFlow
             nodes={nodes}
@@ -62,7 +69,6 @@ const PrecedenceGraph = ({ analysisResult }) => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             fitView
-            colorMode="dark"
           >
             <Background color="var(--border-color)" gap={20} />
             <Controls />
