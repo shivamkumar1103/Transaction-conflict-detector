@@ -59,9 +59,9 @@ const PrecedenceGraph = ({ analysisResult }) => {
   }, [analysisResult, setNodes, setEdges]);
 
   return (
-    <div className="glass-panel" style={{ height: '100%', minHeight: '400px', display: 'flex', flexDirection: 'column' }}>
+    <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <h2 style={{ marginBottom: '15px', fontSize: '1.2rem', fontWeight: 600 }}>Precedence Graph</h2>
-      <div style={{ flex: 1, borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.5)' }}>
+      <div style={{ flex: 1, borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'rgba(0, 0, 0, 0.2)' }}>
         {nodes.length > 0 ? (
           <ReactFlow
             nodes={nodes}
@@ -69,6 +69,8 @@ const PrecedenceGraph = ({ analysisResult }) => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             fitView
+            preventScrolling={false}
+            zoomOnScroll={false}
           >
             <Background color="var(--border-color)" gap={20} />
             <Controls />

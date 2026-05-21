@@ -13,8 +13,8 @@ const QuizMode = ({ operations, analysisResult, onExit }) => {
     return (
       <div className="glass-panel flex-center" style={{ height: '100%', flexDirection: 'column', gap: '20px' }}>
         <HelpCircle size={48} color="var(--accent-primary)" />
-        <h2>Quiz Mode requires an analyzed schedule.</h2>
-        <button className="btn" onClick={onExit}>Back to Visualizer</button>
+        <h2>Simulation Quiz requires an analyzed schedule.</h2>
+        <button className="btn" onClick={onExit}>Back to Dashboard</button>
       </div>
     );
   }
@@ -34,9 +34,9 @@ const QuizMode = ({ operations, analysisResult, onExit }) => {
 
     if (correct) {
       setScore(s => s + 1);
-      setFeedback({ type: 'success', text: 'Correct! You successfully identified the conflict types.' });
+      setFeedback({ type: 'success', text: 'Spot on! You correctly identified the conflict types.' });
     } else {
-      setFeedback({ type: 'error', text: 'Incorrect. Please check the actual conflicts.' });
+      setFeedback({ type: 'error', text: 'Incorrect. Please review the timeline for conflicts.' });
     }
     setTimeout(() => {
       setFeedback(null);
@@ -49,9 +49,9 @@ const QuizMode = ({ operations, analysisResult, onExit }) => {
     const correct = choice === isSerializable;
     if (correct) {
       setScore(s => s + 1);
-      setFeedback({ type: 'success', text: 'Correct! Great job.' });
+      setFeedback({ type: 'success', text: 'Correct! Great job analyzing the schedule safety.' });
     } else {
-      setFeedback({ type: 'error', text: 'Incorrect. Remember to check for cycles in the precedence graph.' });
+      setFeedback({ type: 'error', text: 'Incorrect. Remember to check for cycle deadlocks in the precedence graph.' });
     }
     setTimeout(() => {
       setFeedback(null);
@@ -59,26 +59,32 @@ const QuizMode = ({ operations, analysisResult, onExit }) => {
     }, 2500);
   };
 
+  // Provide a static timeline step for the quiz view
+  const currentStep = operations.length;
+
   return (
-    <div className="glass-panel" style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="glass-panel" style={{ maxWidth: '900px', margin: '0 auto' }}>
       <div className="flex-between" style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Quiz Mode</h2>
-        <button className="btn btn-outline" onClick={onExit}>Exit Quiz</button>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Reservation Safety Quiz</h2>
+        <button className="btn btn-outline" onClick={onExit}>Exit Training</button>
       </div>
       
-      <ScheduleTimeline operations={operations} />
+      <div style={{ pointerEvents: 'none', opacity: 0.9 }}>
+         <ScheduleTimeline operations={operations} currentStep={currentStep} setCurrentStep={() => {}} />
+      </div>
 
-      <div style={{ marginTop: '30px', background: 'var(--panel-bg)', padding: '20px', borderRadius: '8px' }}>
+      <div style={{ marginTop: '30px', background: 'var(--bg-color)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
         {feedback && (
           <div style={{
             padding: '15px',
-            borderRadius: '8px',
+            borderRadius: '10px',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
             background: feedback.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-            color: feedback.type === 'success' ? 'var(--accent-success)' : 'var(--accent-danger)'
+            color: feedback.type === 'success' ? 'var(--accent-success)' : 'var(--accent-danger)',
+            border: `1px solid ${feedback.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
           }}>
             {feedback.type === 'success' ? <CheckCircle /> : <XCircle />}
             <span style={{ fontWeight: 600 }}>{feedback.text}</span>
@@ -87,46 +93,58 @@ const QuizMode = ({ operations, analysisResult, onExit }) => {
 
         {step === 0 && (
           <div>
-            <h3 style={{ marginBottom: '15px' }}>Question 1: What types of conflicts are present in this schedule?</h3>
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={selectedConflicts.RW} onChange={e => setSelectedConflicts({...selectedConflicts, RW: e.target.checked})} />
-                Read-Write (RW)
+            <h3 style={{ marginBottom: '15px' }}>Question 1: What types of booking conflicts occurred in this schedule?</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '25px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', background: 'var(--panel-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <input type="checkbox" checked={selectedConflicts.RW} onChange={e => setSelectedConflicts({...selectedConflicts, RW: e.target.checked})} style={{ width: '18px', height: '18px' }} />
+                <div>
+                  <strong>Check-Book Conflict (RW)</strong>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>User A checks a seat, User B books it before A can.</div>
+                </div>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={selectedConflicts.WR} onChange={e => setSelectedConflicts({...selectedConflicts, WR: e.target.checked})} />
-                Write-Read (WR)
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', background: 'var(--panel-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <input type="checkbox" checked={selectedConflicts.WR} onChange={e => setSelectedConflicts({...selectedConflicts, WR: e.target.checked})} style={{ width: '18px', height: '18px' }} />
+                <div>
+                  <strong>Book-Check Conflict (WR)</strong>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>User A books a seat, User B checks it (seeing a dirty/uncommitted booking).</div>
+                </div>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={selectedConflicts.WW} onChange={e => setSelectedConflicts({...selectedConflicts, WW: e.target.checked})} />
-                Write-Write (WW)
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', background: 'var(--panel-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <input type="checkbox" checked={selectedConflicts.WW} onChange={e => setSelectedConflicts({...selectedConflicts, WW: e.target.checked})} style={{ width: '18px', height: '18px' }} />
+                <div>
+                  <strong>Double Booking (WW)</strong>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>User A and User B both successfully book the exact same seat (Lost Update).</div>
+                </div>
               </label>
             </div>
-            <button className="btn" onClick={handleConflictSubmit} disabled={feedback !== null}>
-              Submit <ArrowRight size={18} />
+            <button className="btn btn-primary" onClick={handleConflictSubmit} disabled={feedback !== null}>
+              Submit Answer <ArrowRight size={18} />
             </button>
           </div>
         )}
 
         {step === 1 && (
           <div>
-            <h3 style={{ marginBottom: '15px' }}>Question 2: Is this schedule Conflict Serializable?</h3>
+            <h3 style={{ marginBottom: '15px' }}>Question 2: Is this reservation schedule completely safe (Serializable)?</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '0.9rem' }}>
+              A schedule is safe if it's equivalent to the users booking one after the other in isolation, with no cycles in the precedence graph.
+            </p>
             <div style={{ display: 'flex', gap: '20px' }}>
-              <button className={`btn ${selectedSerializable === true ? '' : 'btn-outline'}`} onClick={() => handleSerializabilitySubmit(true)} disabled={feedback !== null}>
-                Yes, it is Serializable
+              <button className={`btn ${selectedSerializable === true ? 'btn-success' : 'btn-outline'}`} onClick={() => handleSerializabilitySubmit(true)} disabled={feedback !== null}>
+                Yes, it is Safe (Serializable)
               </button>
-              <button className={`btn ${selectedSerializable === false ? '' : 'btn-outline'}`} onClick={() => handleSerializabilitySubmit(false)} disabled={feedback !== null}>
-                No, it is Non-Serializable
+              <button className={`btn ${selectedSerializable === false ? 'btn-danger' : 'btn-outline'}`} onClick={() => handleSerializabilitySubmit(false)} disabled={feedback !== null}>
+                No, it is Unsafe (Has Cycles)
               </button>
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="flex-center" style={{ flexDirection: 'column', gap: '15px' }}>
-            <h2 style={{ fontSize: '2rem', color: 'var(--accent-primary)' }}>Quiz Complete!</h2>
+          <div className="flex-center" style={{ flexDirection: 'column', gap: '15px', padding: '20px 0' }}>
+            <h2 style={{ fontSize: '2rem', color: 'var(--accent-primary)', textShadow: 'var(--shadow-glow)' }}>Training Complete!</h2>
             <div style={{ fontSize: '1.2rem' }}>Your Score: <strong>{score} / 2</strong></div>
-            <button className="btn" onClick={onExit}>Back to Visualizer</button>
+            <button className="btn" onClick={onExit} style={{ marginTop: '20px' }}>Back to Dashboard</button>
           </div>
         )}
       </div>

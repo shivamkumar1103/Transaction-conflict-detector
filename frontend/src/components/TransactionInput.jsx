@@ -1,70 +1,54 @@
 import { useState } from 'react';
-import { Plus, Trash2, Play } from 'lucide-react';
+import { Play, Shuffle, Trash2 } from 'lucide-react';
 
 const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
-  const [transaction, setTransaction] = useState('T1');
-  const [opType, setOpType] = useState('R');
-  const [dataItem, setDataItem] = useState('X');
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!transaction) return;
+  const handleGenerateRandom = () => {
+    dispatch({ type: 'CLEAR_SCHEDULE' });
     
-    // For Commit and Abort, dataItem is not needed
-    const finalDataItem = (opType === 'C' || opType === 'A') ? '' : dataItem;
+    // Generate a random schedule of seat bookings
+    const users = ['U1', 'U2', 'U3', 'U4'];
+    const seats = ['S1', 'S2', 'S3', 'S4', 'S5'];
     
-    dispatch({
-      type: 'ADD_OPERATION',
-      payload: {
+    const newOps = [];
+    const numOps = Math.floor(Math.random() * 8) + 5; // 5 to 12 ops
+    
+    for (let i = 0; i < numOps; i++) {
+      const user = users[Math.floor(Math.random() * users.length)];
+      const seat = seats[Math.floor(Math.random() * seats.length)];
+      
+      // 70% chance to Check (Read), 30% chance to Book (Write)
+      // Or if it's the first time they interact with a seat, usually Read first.
+      const isBook = Math.random() > 0.6;
+      
+      newOps.push({
         id: Math.random().toString(36).substring(7),
-        transaction: transaction.trim().toUpperCase(),
-        type: opType,
-        dataItem: finalDataItem.trim().toUpperCase()
-      }
+        transaction: user,
+        type: isBook ? 'W' : 'R',
+        dataItem: seat
+      });
+    }
+
+    newOps.forEach(op => {
+      dispatch({ type: 'ADD_OPERATION', payload: op });
     });
   };
 
   return (
     <div className="glass-panel">
-      <h2 style={{ marginBottom: '15px', fontSize: '1.2rem', fontWeight: 600 }}>Schedule Input</h2>
-      
-      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '15px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <input 
-          type="text" 
-          placeholder="Txn (e.g., T1)" 
-          value={transaction}
-          onChange={(e) => setTransaction(e.target.value)}
-          style={{ width: '100px' }}
-          required
-        />
-        <select value={opType} onChange={(e) => setOpType(e.target.value)}>
-          <option value="R">Read</option>
-          <option value="W">Write</option>
-          <option value="C">Commit</option>
-          <option value="A">Abort</option>
-        </select>
-        {(opType === 'R' || opType === 'W') && (
-          <input 
-            type="text" 
-            placeholder="Data (e.g., X)" 
-            value={dataItem}
-            onChange={(e) => setDataItem(e.target.value)}
-            style={{ width: '100px' }}
-            required={opType === 'R' || opType === 'W'}
-          />
-        )}
-        <button type="submit" className="btn">
-          <Plus size={18} /> Add
+      <div className="flex-between" style={{ marginBottom: '20px' }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Simulation Generator</h2>
+        <button className="btn btn-outline" onClick={handleGenerateRandom}>
+          <Shuffle size={16} /> Random Load
         </button>
-      </form>
+      </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px' }}>
-        {operations.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No operations added yet.</span>}
+        {operations.length === 0 && <span style={{ color: 'var(--text-muted)' }}>No operations simulated yet. Click Random Load.</span>}
         {operations.map((op, idx) => (
           <div key={op.id} style={{
-            background: 'var(--panel-bg)',
+            background: 'var(--bg-color)',
             padding: '8px 12px',
-            borderRadius: '6px',
+            borderRadius: '8px',
             border: '1px solid var(--border-color)',
             display: 'flex',
             alignItems: 'center',
@@ -72,13 +56,13 @@ const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
           }}>
             <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{idx + 1}.</span>
             <span>
-              {op.type === 'C' || op.type === 'A' ? 
-                `${op.type}(${op.transaction})` : 
-                `${op.type}${op.transaction.replace('T', '')}(${op.dataItem})`}
+              {op.type === 'R' ? 'Check ' : 'Book '} 
+              <strong style={{ color: op.type === 'W' ? 'var(--accent-success)' : 'var(--text-main)' }}>{op.dataItem}</strong>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '4px' }}>by {op.transaction}</span>
             </span>
             <button 
               onClick={() => dispatch({ type: 'REMOVE_OPERATION', payload: op.id })}
-              style={{ background: 'none', border: 'none', color: 'var(--accent-danger)', cursor: 'pointer', display: 'flex' }}
+              style={{ background: 'none', border: 'none', color: 'var(--accent-danger)', cursor: 'pointer', display: 'flex', marginLeft: '4px' }}
             >
               <Trash2 size={16} />
             </button>
@@ -95,11 +79,12 @@ const TransactionInput = ({ operations, dispatch, onAnalyze, isLoading }) => {
           Clear All
         </button>
         <button 
-          className="btn" 
+          className="btn btn-success" 
           onClick={onAnalyze}
           disabled={operations.length === 0 || isLoading}
+          style={{ flex: 1 }}
         >
-          {isLoading ? 'Analyzing...' : <><Play size={18} /> Analyze Schedule</>}
+          {isLoading ? 'Analyzing Conflict Graph...' : <><Play size={18} /> Run Analysis Engine</>}
         </button>
       </div>
     </div>

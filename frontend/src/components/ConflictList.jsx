@@ -1,15 +1,23 @@
 import React from 'react';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, X } from 'lucide-react';
 
-const ConflictList = ({ analysisResult }) => {
+const ConflictList = ({ analysisResult, onClose }) => {
   if (!analysisResult) return null;
 
   const { conflicts, isSerializable } = analysisResult;
 
   return (
-    <div className="glass-panel" style={{ height: '100%', overflowY: 'auto' }}>
-      <h2 style={{ marginBottom: '15px', fontSize: '1.2rem', fontWeight: 600 }}>Analysis Results</h2>
-      
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid var(--border-color)' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Analysis Results</h2>
+          <button className="btn-outline" style={{ border: 'none', padding: '5px', cursor: 'pointer' }} onClick={onClose}>
+            <X size={20} color="var(--text-muted)" />
+          </button>
+        </div>
+        
+        <div style={{ padding: '20px', overflowY: 'auto' }}>
+
       <div style={{
         padding: '15px',
         borderRadius: '8px',
@@ -77,6 +85,8 @@ const ConflictList = ({ analysisResult }) => {
           })}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };
